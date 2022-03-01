@@ -13,7 +13,7 @@ import xarray as xr
 # as a pandas dataframe
 def load_dataframe(path):
     ds = xr.open_dataset(path, decode_cf=False)
-    lat_bnds, lon_bnds = [31, 33], [61.25, 63.75]
+    lat_bnds, lon_bnds = [31,33], [61.25, 63.75]
     subset = ds.sel(lat=slice(*lat_bnds), lon=slice(*lon_bnds))
     return subset.to_dataframe()
 
@@ -47,8 +47,9 @@ def load_all_df(directory):
     for i in result:
         print(i)
         curr_df = load_dataframe(i)
-        curr_df = curr_df[curr_df["bnds"] == 0]
         curr_df.reset_index(inplace=True)
+        curr_df = curr_df[curr_df["bnds"] == 0]
+        print(curr_df.shape)
         dataHolder.append(curr_df)
 
     return dataHolder
@@ -94,7 +95,7 @@ def create_date_col(df):
 
 
 # function to find the closest lat lon pairs to match up the local data with a specific gauge in the global model
-def find_closest_coord(lat, lon, target_lat=[30, 32], target_lon=[60, 62.5]):
+def find_closest_coord(lat, lon, target_lat=[31, 33], target_lon=[63.75, 66]):
 
     arr = np.asarray(target_lat)
     i = (np.abs(arr - lat)).argmin()
@@ -113,12 +114,12 @@ def merge_global_data(global_data):
     for i in global_data:
         if "height" in i.columns:
             i.drop(columns=["height"], inplace=True)
-        i.drop(columns=["bnds", "time", "lat", "lon", "time_bnds"], inplace=True)
+        i.drop(columns=["bnds", "time", "lat_bnds", "lon_bnds", "time_bnds"], inplace=True)
         list_of_dfs.append(i)
 
     df_final = reduce(
         lambda left, right: pd.merge(
-            left, right, on=["Datetime", "lat_bnds", "lon_bnds"]
+            left, right, on=["Datetime", "lat", "lon"]
         ),
         list_of_dfs,
     )
@@ -130,7 +131,7 @@ def main():
     # loop through all data files and load them as a pandas dataframe
     # directory = "/Volumes/Transcend/DownscalingData/ClimateModelData/"
     dataList_path = "/Volumes/Transcend/DownscalingData/dataModels/dataList"
-    #
+
     # dataHolder = load_all_df(directory)
     # pickle_dump(dataHolder, dataList_path)
 
@@ -139,7 +140,7 @@ def main():
 
     # concatenate all of the corresponding preserving the time series data
     master_df = concat_variables_and_sort(dataList)
-
+    print(master_df[0].head())
     # Create a date column for all global datasets to merge local data with
     for i in master_df:
         create_date_col(i)
@@ -202,8 +203,8 @@ def main():
             curr_city = i.split("_")[1].split(".")[0]
             curr_df.insert(0, "City", curr_city)
             # find closest coordinates to one of the 4 values in the global data (lat, lon):
-            # 1) (30, 60)
-            # 2) (30, 62.5)
+            # 1) (31, 61.25)
+            # 2) (33, 62.5)
             # 3) (32, 60)
             # 4) (32, 62.5)
 
@@ -213,20 +214,20 @@ def main():
             # insert original lat lon pairs AND closest to global data pairs
             curr_df.insert(2, "Latitude", lat_lon_dict[curr_city][0])
             curr_df.insert(3, "Longitude", lat_lon_dict[curr_city][1])
-            curr_df.insert(4, "lat_bnds", closest_coord[0])
-            curr_df.insert(5, "lon_bnds", closest_coord[1])
+            curr_df.insert(4, "lat", closest_coord[0])
+            curr_df.insert(5, "lon", closest_coord[1])
             curr_df["Datetime"] = pd.to_datetime(curr_df["Datetime"])
             local_dfs.append(curr_df)
 
     # concatenate all local data into one dataframe
     local_df = pd.concat(local_dfs)
-    print(local_df.shape)
+
     # merge all global data into one dataframe
     global_df = merge_global_data(master_df)
-    print(global_df.shape)
+
     # now create final_df, by merging all into one
     final_df = pd.merge(
-        local_df, global_df, how="inner", on=["Datetime", "lat_bnds", "lon_bnds"]
+        local_df, global_df, how="inner", on=["Datetime", "lat", "lon"]
     )
     precip_col = final_df.pop("Precip_3hourly")
     final_df["precipitation"] = precip_col
@@ -234,6 +235,10 @@ def main():
     final_df.reset_index(inplace=True, drop=True)
     print(final_df.shape)
     print(final_df.head().to_string())
+    print(final_df["lat"].value_counts())
+    print(final_df["lon"].value_counts())
+    print("lat: ", final_df["Latitude"].describe())
+    print("lon: ", final_df["Longitude"].describe())
 
 
 if __name__ == "__main__":
