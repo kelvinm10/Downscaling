@@ -8,10 +8,6 @@ certifi==2021.10.8
     # via pyproj
 cftime==1.5.2
     # via netcdf4
-geographiclib==1.52
-    # via geopy
-geopy==2.2.0
-    # via -r requirements.in
 joblib==1.1.0
     # via -r requirements.in
 netcdf4==1.5.8
@@ -22,14 +18,21 @@ numpy==1.22.2
     #   cftime
     #   netcdf4
     #   pandas
+    #   patsy
     #   scipy
+    #   statsmodels
     #   xarray
 packaging==21.3
-    # via xarray
+    # via
+    #   statsmodels
+    #   xarray
 pandas==1.4.0
     # via
     #   -r requirements.in
+    #   statsmodels
     #   xarray
+patsy==0.5.2
+    # via statsmodels
 plotly==5.6.0
     # via -r requirements.in
 pyparsing==3.0.7
@@ -43,11 +46,16 @@ pytz==2021.3
 salem==0.3.7
     # via -r requirements.in
 scipy==1.8.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   statsmodels
 six==1.16.0
     # via
+    #   patsy
     #   plotly
     #   python-dateutil
+statsmodels==0.13.2
+    # via -r requirements.in
 tenacity==8.0.1
     # via plotly
 xarray==0.21.1

@@ -7,4 +7,4 @@ pyproj
 scipy
 joblib
 plotly
-geopy
+statsmodels
