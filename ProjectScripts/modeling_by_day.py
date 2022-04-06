@@ -5,19 +5,18 @@ import numpy as np
 import pandas as pd
 from featurewiz import featurewiz
 # from sklearn.model_selection import cross_validate
-# from imblearn.over_sampling import SMOTE
+from imblearn.over_sampling import SMOTE
 from modeling import (fit_model, get_accuracy, get_precision,  # noqa: E731
                       get_recall)
 from preprocessing import pickle_dump, pickle_load  # noqa: E731
 from sklearn import metrics
-# from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
 # from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix
-
 # from scipy import stats
 # from sklearn.svm import SVC
 # from sklearn.neighbors import KNeighborsClassifier
-# from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 
 
 def test_score(model, y_test, x_test):
@@ -124,7 +123,7 @@ data_test = feature_df_test.loc[
 
 # try out featurewiz
 target = "precip_binary"
-features, train = featurewiz(
+train, test = featurewiz(
     data_train,
     target,
     corr_limit=0.7,
@@ -136,39 +135,42 @@ features, train = featurewiz(
     category_encoders="",
 )
 
-print(features)
-print(train)
 
 # create train test split
 # feature_df_train = feature_df[feature_df["date"] < datetime.date(datetime.strptime('2006-1-1', '%Y-%m-%d'))]
 # feature_df_test = feature_df[feature_df["date"] >= datetime.date(datetime.strptime('2006-1-1', '%Y-%m-%d'))]
 #
-# # now get x_train, y_train, x_test, and y_test variables
-# x_train = feature_df_train.loc[:,~feature_df_train.columns.isin(["date", "precip_binary", "City", "precipitation"])]
-# cols = list(x_train.columns)
-# y_train = feature_df_train["precip_binary"]
-# x_test = feature_df_test.loc[:,~feature_df_test.columns.isin(["date", "precip_binary","City", "precipitation"])]
-# y_test = feature_df_test["precip_binary"]
-#
-# # normalize all data
-# scaler = MinMaxScaler()
-# x_train = scaler.fit_transform(x_train)
-#
-#
-#
-# # use SMOTE to fix class imbalance
-# oversample = SMOTE()
-# x_train, y_train = oversample.fit_resample(x_train, y_train)
+# now get x_train, y_train, x_test, and y_test variables
+x_train = train.loc[
+    :, ~train.columns.isin(["date", "precip_binary", "City", "precipitation"])
+]
+cols = list(x_train.columns)
+print(train.columns)
+y_train = train["precip_binary"]
+x_test = test.loc[
+    :, ~test.columns.isin(["date", "precip_binary", "City", "precipitation"])
+]
+y_test = data_test["precip_binary"]
 
-# print(y_train.value_counts())
-
-# clf = RandomForestClassifier(verbose=100, n_jobs=-1)
-# clf.fit(x_train, y_train)
-# # print(np.mean(get_accuracy(result['test_pred_dry_actual_dry'], result['test_pred_wet_actual_wet'],
-# #                            result['test_pred_wet_actual_dry'], result['test_pred_dry_actual_wet'])))
-# acc, cm = test_score(clf, y_test, scaler.fit_transform(x_test))
-# print(acc)
+# normalize all data
+scaler = MinMaxScaler()
+x_train = scaler.fit_transform(x_train)
 #
+#
+#
+# use SMOTE to fix class imbalance
+oversample = SMOTE()
+x_train, y_train = oversample.fit_resample(x_train, y_train)
+
+print(y_train.value_counts())
+
+clf = RandomForestClassifier(verbose=100, n_jobs=-1)
+clf.fit(x_train, y_train)
+# print(np.mean(get_accuracy(result['test_pred_dry_actual_dry'], result['test_pred_wet_actual_wet'],
+#                            result['test_pred_wet_actual_dry'], result['test_pred_dry_actual_wet'])))
+acc, cm = test_score(clf, y_test, scaler.fit_transform(x_test))
+print(acc)
+
 # importances = list(clf.feature_importances_)
 #
 # feature_importances_df = pd.DataFrame({"feature": cols, "importance": importances}).sort_values(by="importance",
