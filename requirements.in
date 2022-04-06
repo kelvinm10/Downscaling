@@ -8,3 +8,6 @@ scipy
 joblib
 plotly
 statsmodels
+imbalanced-learn
+featurewiz
+cmake
