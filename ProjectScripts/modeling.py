@@ -66,8 +66,7 @@ def main():
 
     # 2 step modeling:
     # 1) predict dry or wet period (1 or 0) classification
-    # 2) if wet day (1), then predict amount of precipitation in millimeters (regression)
-    # can also do extreme rain day vs light rain day (classification) then regress on that
+    # 2) if wet day (1), then predict amount of precipitation in inches (regression)
 
     # 1) Classification: wet(1) vs dry(0) period, first, visualize wet vs dry periods
     print(df["precip_binary"].value_counts() / len(df))
@@ -156,8 +155,7 @@ def main():
     ).sort_values(by="importance", ascending=False)
     print(feature_importances_df.head(20).to_string())
 
-
-# GAN to generate real samples (maybe instead of smote)
+    print(feature_df.shape)
 
 
 if __name__ == "__main__":

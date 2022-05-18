@@ -13,11 +13,11 @@ from sklearn.ensemble import RandomForestClassifier
 # from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import KFold
-
 # from scipy import stats
 # from sklearn.svm import SVC
 # from sklearn.neighbors import KNeighborsClassifier
-# from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
+
 # from sklearn.neural_network import MLPClassifier
 
 
@@ -140,6 +140,7 @@ df_day["precip_binary"] = res.values
 
 
 df_day = df_day.sort_values(by=["City", "date"])
+print(df_day.tail())
 
 # pd.to_pickle(df_day, "/Volumes/Transcend/DownscalingData/dataModels/df_day")
 # print(df_day["clt1"].value_counts())
@@ -160,78 +161,134 @@ feature_df["date"] = pd.to_datetime(feature_df["date"])
 
 
 # split data into wet season and dry season and build 2 models
-wet_season_df = feature_df[
-    (feature_df["date"].dt.month >= 11) | (feature_df["date"].dt.month <= 3)
-]
-dry_season_df = feature_df[
-    (feature_df["date"].dt.month >= 4) | (feature_df["date"].dt.month <= 10)
-]
+# wet_season_df = feature_df[
+#     (feature_df["date"].dt.month >= 11) | (feature_df["date"].dt.month <= 3)
+# ]
+# dry_season_df = feature_df[
+#     (feature_df["date"].dt.month >= 4) | (feature_df["date"].dt.month <= 10)
+# ]
 
 # feature_df_train = feature_df[
 #     feature_df["date"] < datetime.date(datetime.strptime("2006-1-1", "%Y-%m-%d"))
 # ]
+feature_df_train = feature_df[feature_df["date"] < "2006-1-1"]
 # feature_df_test = feature_df[
 #     feature_df["date"] >= datetime.date(datetime.strptime("2006-1-1", "%Y-%m-%d"))
 # ]
+feature_df_test = feature_df[feature_df["date"] >= "2006-1-1"]
 
 # split wet and dry dfs into train and test splits
-wet_df_train = wet_season_df[wet_season_df["date"] < "2006-1-1"]
-wet_df_test = wet_season_df[wet_season_df["date"] >= "2006-1-1"]
+# wet_df_train = wet_season_df[wet_season_df["date"] < "2006-1-1"]
+# wet_df_test = wet_season_df[wet_season_df["date"] >= "2006-1-1"]
+#
+# dry_df_train = dry_season_df[dry_season_df["date"] < "2006-1-1"]
+# dry_df_test = dry_season_df[dry_season_df["date"] >= "2006-1-1"]
 
-dry_df_train = dry_season_df[dry_season_df["date"] < "2006-1-1"]
-dry_df_test = dry_season_df[dry_season_df["date"] >= "2006-1-1"]
 
+data_train = feature_df_train.loc[
+    :,
+    feature_df.columns.isin(
+        [
+            "clt4",
+            "hfls1",
+            "rsdsdiff1",
+            "hfls2",
+            "rsdsdiff2",
+            "hfls3",
+            "rsdsdiff3",
+            "hfls4",
+            "rsdsdiff4",
+            "ps2",
+            "ps4",
+            "uas2",
+            "vas4",
+            "uas1",
+            "hfss1",
+            "hfss2",
+            "rsus3",
+            "huss4",
+            "rsus4",
+            "pr1",
+            "prc4",
+            "pr2",
+            "pr3",
+            "clt2",
+            "precip_binary",
+        ]
+    ),
+]
+data_test = feature_df_test.loc[
+    :,
+    feature_df.columns.isin(
+        [
+            "clt4",
+            "hfls1",
+            "rsdsdiff1",
+            "hfls2",
+            "rsdsdiff2",
+            "hfls3",
+            "rsdsdiff3",
+            "hfls4",
+            "rsdsdiff4",
+            "ps2",
+            "ps4",
+            "uas2",
+            "vas4",
+            "uas1",
+            "hfss1",
+            "hfss2",
+            "rsus3",
+            "huss4",
+            "rsus4",
+            "pr1",
+            "prc4",
+            "pr2",
+            "pr3",
+            "clt2",
+            "precip_binary",
+        ]
+    ),
+]
 
-# data_train = feature_df_train.loc[
-#     :,
-#     feature_df.columns.isin(
-#         ['ps2', 'rsus3', 'hfss1', 'vas4', 'rsdsdiff3', 'pr1', 'hfss2', 'huss4', 'pr3', 'pr2', 'rsus4', 'clt2', 'prc4',
-#          'precip_binary']
-#     ),
+# data_train_wet = wet_df_train.loc[
+#     :, ~wet_season_df.columns.isin(["date", "City", "precipitation"])
 # ]
-# data_test = feature_df_test.loc[
-#     :,
-#     feature_df.columns.isin(
-#         ['ps2', 'rsus3', 'hfss1', 'vas4', 'rsdsdiff3', 'pr1', 'hfss2', 'huss4', 'pr3', 'pr2', 'rsus4', 'clt2', 'prc4',
-#          'precip_binary']
-#     ),
+# data_test_wet = wet_df_test.loc[
+#     :, ~wet_season_df.columns.isin(["date", "City", "precipitation"])
+# ]
+#
+# data_train_dry = dry_df_train.loc[
+#     :, ~dry_season_df.columns.isin(["date", "City", "precipitation"])
+# ]
+# data_test_dry = dry_df_test.loc[
+#     :, ~dry_season_df.columns.isin(["date", "City", "precipitation"])
 # ]
 
-data_train_wet = wet_df_train.loc[
-    :, ~wet_season_df.columns.isin(["date", "City", "precipitation"])
-]
-data_test_wet = wet_df_test.loc[
-    :, ~wet_season_df.columns.isin(["date", "City", "precipitation"])
-]
 
-data_train_dry = dry_df_train.loc[
-    :, ~dry_season_df.columns.isin(["date", "City", "precipitation"])
-]
-data_test_dry = dry_df_test.loc[
-    :, ~dry_season_df.columns.isin(["date", "City", "precipitation"])
-]
-
-
-print("wet train: ", data_train_wet.head())
+# print("wet train: ", data_train_wet.head())
 # print("dry train: ", data_train_dry.head())
 # print("wet test: ", data_test_wet.head())
 # print("dry test: ", data_test_dry.head())
 
 # try out featurewiz
-target = "precip_binary"
-train_wet, test_wet = featurewiz(
-    data_train_wet,
-    target,
-    corr_limit=0.7,
-    verbose=2,
-    sep=",",
-    header=0,
-    test_data=data_test_wet,
-    feature_engg="",
-    category_encoders="",
-)
 
-test_wet["precip_binary"] = data_test_wet["precip_binary"]
+# feature_df_train = feature_df_train.drop(["date", "City", "precipitation"], axis=1)
+# feature_df_test = feature_df_test.drop(["date", "City", "precipitation"], axis=1)
+# print("columns: ", feature_df_train.columns)
+# target = "precip_binary"
+# data_train, data_test = featurewiz(
+#     data_train,
+#     target,
+#     corr_limit=0.7,
+#     verbose=2,
+#     sep=",",
+#     header=0,
+#     test_data=data_test,
+#     feature_engg="",
+#     category_encoders="",
+# )
+
+# test["precip_binary"] = data_test["precip_binary"]
 # print("train shape: ", train.shape)
 # print("test shape: ", test.shape)
 # train = train.dropna()
@@ -245,74 +302,58 @@ test_wet["precip_binary"] = data_test_wet["precip_binary"]
 # feature_df_test = feature_df[feature_df["date"] >= datetime.date(datetime.strptime('2006-1-1', '%Y-%m-%d'))]
 #
 # now get x_train, y_train, x_test, and y_test variables
-x_train_wet = train_wet.loc[
-    :, ~train_wet.columns.isin(["date", "precip_binary", "City", "precipitation"])
+x_train = data_train.loc[
+    :, ~data_train.columns.isin(["date", "precip_binary", "City", "precipitation"])
 ].reset_index(drop=True)
 
 
-y_train_wet = train_wet["precip_binary"].reset_index(drop=True)
-x_test_wet = test_wet.loc[
-    :, ~test_wet.columns.isin(["date", "precip_binary", "City", "precipitation"])
+y_train = data_train["precip_binary"].reset_index(drop=True)
+x_test = data_test.loc[
+    :, ~data_test.columns.isin(["date", "precip_binary", "City", "precipitation"])
 ].reset_index(drop=True)
-y_test_wet = test_wet["precip_binary"]
+y_test = data_test["precip_binary"]
 
 # normalize all data
-# scaler = MinMaxScaler()
-# scaler.fit(x_train_wet)
-# x_train_wet = scaler.transform(x_train_wet)
-#
-#
-#
-# print(y_train_wet.value_counts())
-# # use SMOTE to fix class imbalance
-# oversample = SMOTE()
-# x_train_wet, y_train_wet = oversample.fit_resample(x_train_wet, y_train_wet)
-#
-# print(y_train_wet.value_counts())
+scaler = MinMaxScaler()
+# scaler.fit(x_train)
+# x_train = scaler.transform(x_train)
 
-# ******** SMOTE WITHIN KFOLD *************
-# params = {
-#     'hidden_layer_sizes': [(10,30,10),(20,)],
-#     'activation': ['tanh', 'relu'],
-#     'solver': ['sgd', 'adam'],
-#     'alpha': [0.0001, 0.05],
-#     'learning_rate': ['constant','adaptive'],
-# }
-#
-# score_tracker = []
-# for sizes in params['hidden_layer_sizes']:
-#     for activation in params['activation']:
-#         for solver in params["solver"]:
-#             for alpha in params["alpha"]:
-#                 for learning in params["learning_rate"]:
-#                     example_params = {
-#                         'hidden_layer_sizes': sizes,
-#                         'activation': activation,
-#                         'solver': solver,
-#                         'alpha': alpha,
-#                         'learning_rate': learning
-#                 }
-#                     example_params['recall'], example_params["precision"], example_params["f1"] = \
-#                         score_model(MLPClassifier,x_train_wet, y_train_wet, example_params)
-#                     score_tracker.append(example_params)
-#
-# print(score_tracker)
 
 X_train_upsample, y_train_upsample = SMOTE(random_state=42).fit_resample(
-    x_train_wet, y_train_wet
+    x_train, y_train
 )
 clf = RandomForestClassifier(
-    n_estimators=200, max_depth=12, random_state=13, verbose=100
+    n_estimators=200, max_depth=12, random_state=13, verbose=100, n_jobs=-1
 )
-clf.fit(X_train_upsample, y_train_upsample)
-yhat = clf.predict(x_test_wet)
-print("Balanced Accuracy: ", metrics.balanced_accuracy_score(y_test_wet, yhat))
-print("Weighted Recall: ", metrics.recall_score(y_test_wet, yhat, average="weighted"))
-print(
-    "Weighted precision: ",
-    metrics.precision_score(y_test_wet, yhat, average="weighted"),
-)
-print("Weighted F1 Score: ", metrics.f1_score(y_test_wet, yhat, average="weighted"))
+# clf.fit(X_train_upsample, y_train_upsample)
+# yhat = clf.predict(scaler.transform(x_test))
+# print("Accuracy: ", metrics.accuracy_score(y_test, yhat))
+# print("Balanced Accuracy: ", metrics.balanced_accuracy_score(y_test, yhat))
+# print("Weighted Recall: ", metrics.recall_score(y_test, yhat, average="weighted"))
+# print(
+#     "Weighted precision: ",
+#     metrics.precision_score(y_test, yhat, average="weighted"),
+# )
+# print("Weighted F1 Score: ", metrics.f1_score(y_test, yhat, average="weighted"))
+
+# fitting on all data then writing model to disk
+print(X_train_upsample)
+print(y_train_upsample)
+print(x_test.values)
+print(y_test.values)
+
+all_data = np.concatenate((X_train_upsample, x_test.values), axis=0)
+all_data = scaler.fit_transform(all_data)
+
+all_y = np.concatenate((y_train_upsample, y_test), axis=0)
+print(all_data)
+print(all_y)
+
+
+pickle_dump(scaler, "/Volumes/Transcend/DownscalingData/FutureDataSaves/minmaxclf.pkl")
+# clf.fit(all_data, all_y)
+# pickle_dump(clf, "/Volumes/Transcend/DownscalingData/FutureDataSaves/random_forest.pkl")
+
 
 # clf.fit(x_train_wet, y_train_wet)
 # print(np.mean(get_accuracy(result['test_pred_dry_actual_dry'], result['test_pred_wet_actual_wet'],
@@ -438,9 +479,3 @@ print("Weighted F1 Score: ", metrics.f1_score(y_test_wet, yhat, average="weighte
 # knnAcc, knnCm = test_score(knn,y_test_opt, scale.fit_transform(x_test_opt))
 # print("KNN Test Accuracy: ", knnAcc)
 # print("KNN Confusion Matrix: ", knnCm)
-
-
-# use random forest feature selection and try it with other models
-
-
-#

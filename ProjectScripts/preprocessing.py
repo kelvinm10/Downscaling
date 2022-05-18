@@ -347,7 +347,8 @@ def main():
     final_df = pickle_load(path)
 
     print(final_df.shape)
-    print(final_df.head().to_string())
+    print(final_df.columns)
+    print(final_df[["Latitude", "Longitude"]])
     # print(final_df["lat"].value_counts())
     # print(final_df["lon"].value_counts())
     # print("lat: ", final_df["Latitude"].describe())

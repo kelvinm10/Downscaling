@@ -209,11 +209,11 @@ def main():
 
     print("fitting logit Model")
     print("Predictors: ", x_train.columns)
-    result = fit_logistic_regression(x_train.values, y_train.values)
-    pickle_dump(
-        result,
-        "/Volumes/Transcend/DownscalingData/dataModels/logit_result_feature_selection1",
-    )
+    # result = fit_logistic_regression(x_train.values, y_train.values)
+    # pickle_dump(
+    # result,
+    # "/Volumes/Transcend/DownscalingData/dataModels/logit_result_feature_selection1",
+    # )
     result = pickle_load(
         "/Volumes/Transcend/DownscalingData/dataModels/logit_result_feature_selection1"
     )
@@ -240,11 +240,14 @@ def main():
         ),
     )
     print("fitting rf model")
-    clf = RandomForestClassifier(verbose=100, n_jobs=-1)
-    res = fit_model(clf, x_train.values, y_train.values)
-    pickle_dump(
-        res,
-        "/Volumes/Transcend/DownscalingData/dataModels/rf_result_feature_selection1",
+    # clf = RandomForestClassifier(verbose=100, n_jobs=-1)
+    # res = fit_model(clf, x_train.values, y_train.values)
+    # pickle_dump(
+    # res,
+    # "/Volumes/Transcend/DownscalingData/dataModels/rf_result_feature_selection1",
+    # )
+    res = pickle_load(
+        "/Volumes/Transcend/DownscalingData/dataModels/rf_result_feature_selection1"
     )
     print(
         np.mean(
